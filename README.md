@@ -1,3 +1,11 @@
+## This is a fork of stylus and it will get some heavy modifications meaning I can't garanty support for Opera, Firefox and Chrome not running in a Chrome app. All credit goes to OpenStyles developers 
+* [DecentM](https://github.com/DecentM)
+* [Rob Garrison](https://github.com/mottie)
+* [narcolepticinsomniac](https://github.com/narcolepticinsomniac)
+* [Jeremy Schomery](https://github.com/schomery)
+* [tophf](https://github.com/tophf)
+## To contact me email me at isak.ahlberg@utb.tyreso.se and not OpenStyles.
+
 Stylus is a fork of Stylish for Chrome, also compatible with Firefox as a WebExtension
 
 ## Highlights
