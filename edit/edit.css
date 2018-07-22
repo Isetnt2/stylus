@@ -274,6 +274,12 @@ input:invalid {
 #sections > *:not(:first-child) {
   border-top: 2px solid hsl(0, 0%, 80%);
 }
+.add-section:after {
+  content: attr(short-text);
+}
+#sections > div:only-of-type .add-section:after {
+  content: attr(long-text);
+}
 #sections > div:only-of-type .remove-section {
   display: none;
 }
@@ -301,6 +307,24 @@ input:invalid {
   counter-increment: codebox;
   content: counter(codebox);
   margin-left: 0.25rem;
+}
+.section:only-of-type .move-section-up,
+.section:only-of-type .move-section-down {
+  display: none;
+}
+.move-section-up:after {
+  content: "";
+  display: block;
+  border-style: solid;
+  border-width: 0 .3em .5em .3em;
+  border-color: transparent transparent currentColor transparent;
+}
+.move-section-down:after {
+  content: "";
+  display: block;
+  border-style: solid;
+  border-width: .5em .3em 0 .3em;
+  border-color: currentColor transparent transparent transparent;
 }
 /* code */
 .code {

@@ -205,6 +205,14 @@
   "configOnChangeTooltip": {
     "message": "Autosave and apply changes automatically"
   },
+  "genericAdd": {
+    "message": "Add",
+    "description": "Used in various places for an action that adds something"
+  },
+  "genericClone": {
+    "message": "Clone",
+    "description": "Used in various places for an action that clones something"
+  },
   "genericError": {
     "message": "Error",
     "description": "Used in various places to indicate some error occurred."

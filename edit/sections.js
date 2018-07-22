@@ -77,9 +77,12 @@ function addSections(sections, onAdded = () => {}) {
 
 function addSection(event, section) {
   const div = template.section.cloneNode(true);
-  $('.applies-to-help', div).addEventListener('click', showAppliesToHelp, false);
-  $('.remove-section', div).addEventListener('click', removeSection, false);
-  $('.add-section', div).addEventListener('click', addSection, false);
+  $('.applies-to-help', div).addEventListener('click', showAppliesToHelp);
+  $('.remove-section', div).addEventListener('click', removeSection);
+  $('.add-section', div).addEventListener('click', addSection);
+  $('.clone-section', div).addEventListener('click', cloneSection);
+  $('.move-section-up', div).addEventListener('click', moveSection);
+  $('.move-section-down', div).addEventListener('click', moveSection);
   $('.beautify-section', div).addEventListener('click', beautify);
 
   const code = (section || {}).code || '';
@@ -194,6 +197,30 @@ function addAppliesTo(list, type, value) {
   $('.add-applies-to', item).addEventListener('click', addAppliesTo);
   list.insertBefore(item, clickedItem && clickedItem.nextElementSibling);
   if (toFocus) toFocus.focus();
+}
+
+function cloneSection(event) {
+  const section = getSectionForChild(event.target);
+  addSection(event, getSectionsHashes([section]).pop());
+  setCleanItem($('#sections'), false);
+  updateTitle();
+}
+
+function moveSection(event) {
+  const section = getSectionForChild(event.target);
+  const dir = event.target.closest('.move-section-up') ? -1 : 1;
+  const cm = section.CodeMirror;
+  const index = editors.indexOf(cm);
+  const newIndex = (index + dir + editors.length) % editors.length;
+  const currentNextEl = section.nextElementSibling;
+  const newSection = editors[newIndex].getSection();
+  newSection.insertAdjacentElement('afterend', section);
+  section.parentNode.insertBefore(newSection, currentNextEl || null);
+  cm.focus();
+  editors[index] = editors[newIndex];
+  editors[newIndex] = cm;
+  setCleanItem($('#sections'), false);
+  updateTitle();
 }
 
 function setupCodeMirror(sectionDiv, code, index = editors.length) {
@@ -445,7 +472,7 @@ function removeSection(event) {
                    lines.slice(0, MAX_LINES).map(s => clipString(s, 100)).join('\n') +
                    (lines.length > MAX_LINES ? '\n...' : '');
     }
-    stub.onclick = event => {
+    $('.restore-section', stub).onclick = event => {
       addSection(event, data);
       stub.remove();
     };
