@@ -461,20 +461,26 @@ function removeAppliesTo(event) {
 function removeSection(event) {
   const section = getSectionForChild(event.target);
   const cm = section.CodeMirror;
-  if (event instanceof Event) {
+  if (event instanceof Event && (!cm.isClean() || !cm.isBlank())) {
     const stub = template.deletedSection.cloneNode(true);
-    const data = getSectionsHashes([section]).pop();
-    if (data.code.trim()) {
-      const MAX_LINES = 10;
-      const lines = data.code.split('\n', MAX_LINES + 1);
-      stub.title = t('sectionCode') + '\n' +
-                   '-'.repeat(20) + '\n' +
-                   lines.slice(0, MAX_LINES).map(s => clipString(s, 100)).join('\n') +
-                   (lines.length > MAX_LINES ? '\n...' : '');
-    }
-    $('.restore-section', stub).onclick = event => {
-      addSection(event, data);
-      stub.remove();
+    const MAX_LINES = 10;
+    const lines = [];
+    cm.doc.iter(0, MAX_LINES + 1, ({text}) => lines.push(text) && false);
+    stub.title = t('sectionCode') + '\n' +
+                 '-'.repeat(20) + '\n' +
+                 lines.slice(0, MAX_LINES).map(s => clipString(s, 100)).join('\n') +
+                 (lines.length > MAX_LINES ? '\n...' : '');
+    $('.restore-section', stub).onclick = () => {
+      let el = stub;
+      while (el && !el.matches('.section')) {
+        el = el.previousElementSibling;
+      }
+      const index = el ? editors.indexOf(el) + 1 : 0;
+      editors.splice(index, 0, cm);
+      stub.parentNode.replaceChild(section, stub);
+      setCleanItem(section, false);
+      updateTitle();
+      cm.focus();
     };
     section.insertAdjacentElement('afterend', stub);
   }
