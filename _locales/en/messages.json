@@ -840,6 +840,10 @@
     "message": "Remove section",
     "description": "Label for the button to remove a section"
   },
+  "sectionRestore": {
+    "message": "Restore removed section",
+    "description": "Label for the button to restore a removed section"
+  },
   "shortcuts": {
     "message": "Shortcuts",
     "description": "Go to shortcut configuration"

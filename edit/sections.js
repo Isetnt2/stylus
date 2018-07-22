@@ -5,6 +5,7 @@ global onChange indicateCodeChange initHooks setCleanGlobal
 global fromMozillaFormat maximizeCodeHeight toggleContextMenuDelete
 global setCleanItem updateTitle updateLintReportIfEnabled renderLintReport
 global showAppliesToHelp beautify regExpTester setGlobalProgress setCleanSection
+global clipString
 */
 'use strict';
 
@@ -14,7 +15,7 @@ function initWithSectionStyle(style, codeIsUpdated) {
   $('#url').href = style.url || '';
   if (codeIsUpdated !== false) {
     editors.length = 0;
-    getSections().forEach(div => div.remove());
+    $('#sections').textContent = '';
     addSections(style.sections.length ? style.sections : [{code: ''}]);
     initHooks();
   }
@@ -134,8 +135,11 @@ function addSection(event, section) {
   const sections = $('#sections');
   let cm;
   if (event) {
-    const clickedSection = getSectionForChild(event.target);
-    sections.insertBefore(div, clickedSection.nextElementSibling);
+    let clickedSection = event && getSectionForChild(event.target, {includeDeleted: true});
+    clickedSection.insertAdjacentElement('afterend', div);
+    while (clickedSection && !clickedSection.matches('.section')) {
+      clickedSection = clickedSection.previousElementSibling;
+    }
     const newIndex = getSections().indexOf(clickedSection) + 1;
     cm = setupCodeMirror(div, code, newIndex);
     makeSectionVisible(cm);
@@ -192,7 +196,7 @@ function addAppliesTo(list, type, value) {
   if (toFocus) toFocus.focus();
 }
 
-function setupCodeMirror(sectionDiv, code, index) {
+function setupCodeMirror(sectionDiv, code, index = editors.length) {
   const cm = CodeMirror(wrapper => {
     $('.code-label', sectionDiv).insertAdjacentElement('afterend', wrapper);
   }, {
@@ -269,7 +273,7 @@ function setupCodeMirror(sectionDiv, code, index) {
     });
   };
 
-  editors.splice(index || editors.length, 0, cm);
+  editors.splice(index, 0, cm);
   return cm;
 }
 
@@ -385,17 +389,17 @@ function toggleSectionHeight(cm) {
   }
 }
 
-function getSectionForChild(e) {
-  return e.closest('#sections > div');
+function getSectionForChild(el, {includeDeleted} = {}) {
+  return el.closest(`#sections > ${includeDeleted ? '*' : '.section'}`);
 }
 
 function getSections() {
-  return $$('#sections > div');
+  return $$('#sections > .section');
 }
 
-function getSectionsHashes() {
+function getSectionsHashes(elements = getSections()) {
   const sections = [];
-  for (const div of getSections()) {
+  for (const div of elements) {
     const meta = {urls: [], urlPrefixes: [], domains: [], regexps: []};
     for (const li of $('.applies-to-list', div).childNodes) {
       if (li.className === template.appliesToEverything.className) {
@@ -430,6 +434,23 @@ function removeAppliesTo(event) {
 function removeSection(event) {
   const section = getSectionForChild(event.target);
   const cm = section.CodeMirror;
+  if (event instanceof Event) {
+    const stub = template.deletedSection.cloneNode(true);
+    const data = getSectionsHashes([section]).pop();
+    if (data.code.trim()) {
+      const MAX_LINES = 10;
+      const lines = data.code.split('\n', MAX_LINES + 1);
+      stub.title = t('sectionCode') + '\n' +
+                   '-'.repeat(20) + '\n' +
+                   lines.slice(0, MAX_LINES).map(s => clipString(s, 100)).join('\n') +
+                   (lines.length > MAX_LINES ? '\n...' : '');
+    }
+    stub.onclick = event => {
+      addSection(event, data);
+      stub.remove();
+    };
+    section.insertAdjacentElement('afterend', stub);
+  }
   setCleanItem($('#sections'), false);
   removeAreaAndSetDirty(section);
   editors.splice(editors.indexOf(cm), 1);

@@ -331,7 +331,7 @@ function isCleanGlobal() {
 
 function setCleanGlobal() {
   setCleanItem($('#sections'), true);
-  $$('#header, #sections > div').forEach(setCleanSection);
+  $$('#header, #sections > .section').forEach(setCleanSection);
   // forget the dirty applies-to ids from a deleted section after the style was saved
   dirty = {};
 }
